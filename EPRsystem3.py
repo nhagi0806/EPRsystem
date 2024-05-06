@@ -48,29 +48,55 @@ def InitialSetOsc():
     Osc.write(":ACQuire:TYPE AVERage")  # 取得タイプを平均に設定
     Osc.write(f":ACQuire:COUNt {conf2.NAverage}")  # 平均回数を設定
 
-def GetEPRData():
-    # EPRデータを取得
-    Osc.write(":WAVeform:POINts:MODE RAW")  # データポイントのモードをRAWに設定
-    Osc.write(":WAVeform:FORMat ASCII")  # データ形式をASCIIに設定
-    TOrigin, TIncrement = float(Osc.query("WAVeform:XORigin?")), float(Osc.query("WAVeform:XINCrement?"))  # 時間の原点と増分を取得
-    C1 = list(map(float, Osc.query(":WAVeform:SOURce CHANnel1;DATA?").split(',')))  # チャンネル1のデータを取得
-    C2 = list(map(float, Osc.query(":WAVeform:SOURce CHANnel2;DATA?").split(',')))  # チャンネル2のデータを取得
+# ファイル番号を追跡する
+file_number = 1
 
-    save_path_csv = os.path.join(conf.EPRsignal_path, "EPR_data.csv")  # CSVファイルの保存パスを設定
-    save_path_bin = os.path.join(conf.EPRsignal_path, "EPR_data.bin")  # バイナリファイルの保存パスを設定
+def get_next_filename(base_filename, file_number, file_extension):
+    # ファイル名に番号を付けて返す関数
+    return f"{base_filename}_{file_number}.{file_extension}"
 
-    # データをCSVとバイナリファイルに保存
-    with open(save_path_csv, "a", newline='') as file:
-        writer = csv.writer(file)
-        with open(save_path_bin, "ab") as bin_file:
+def get_next_filepath(base_filename, file_number, file_extension):
+    # ファイルパスを生成して返す関数
+    filename = get_next_filename(base_filename, file_number, file_extension)
+    return os.path.join(conf2.EPRsignal_path, filename)
+
+def get_next_filepaths(base_filename, file_number, file_extension1, file_extension2):
+    # バイナリファイルとCSVファイルのファイルパスを生成して返す関数
+    filename1 = get_next_filename(base_filename, file_number, file_extension1)
+    filename2 = get_next_filename(base_filename, file_number, file_extension2)
+    return (
+        os.path.join(conf2.EPRsignal_path, filename1),
+        os.path.join(conf2.EPRsignal_path, filename2)
+    )
+
+def GetEPRData(Osc):
+    # EPRデータの取得を実行する関数
+    Osc.write(":WAVeform:POINts:MODE RAW")  
+    Osc.write(":WAVeform:FORMat ASCII")  
+    TOrigin, TIncrement = float(Osc.query("WAVeform:XORigin?")), float(Osc.query("WAVeform:XINCrement?"))  
+    C1 = list(map(float, Osc.query(":WAVeform:SOURce CHANnel1;DATA?").split(',')))  
+    C2 = list(map(float, Osc.query(":WAVeform:SOURce CHANnel2;DATA?").split(',')))  
+
+    # ファイルパスの取得
+    save_path_csv, save_path_bin = get_next_filepaths("EPR_data", file_number, "csv", "bin")
+
+    # CSVとバイナリファイルへのデータの保存
+    with open(save_path_csv, "a", newline='') as file_csv:
+        writer_csv = csv.writer(file_csv)
+        with open(save_path_bin, "ab") as file_bin:
             for i, (v1, v2) in enumerate(zip(C1, C2)):
-                time = TOrigin + i * TIncrement
-                writer.writerow([time, v1, v2])
-                bin_file.write(struct.pack('d', time))
-                bin_file.write(struct.pack('f', v1))
-                bin_file.write(struct.pack('f', v2))
+                time_val = TOrigin + i * TIncrement
+                writer_csv.writerow([time_val, v1, v2])
+                file_bin.write(struct.pack('d', time_val))
+                file_bin.write(struct.pack('f', v1))
+                file_bin.write(struct.pack('f', v2))
 
-    print(f"Data saved to {save_path_csv} and {save_path_bin}")  # 保存完了のメッセージを表示
+    print(f"Data saved to {save_path_csv} and {save_path_bin}")
+
+    # ファイル番号のインクリメント
+    global file_number
+    file_number += 1
+
 
 def TurnOffFG():
     FG.write(":OUTPut OFF")  # 関数ジェネレータの出力をオフにする
