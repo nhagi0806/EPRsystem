@@ -20,7 +20,7 @@ for dev_name in visa_list:
     out = dev.query('*IDN?')  # デバイス識別情報をクエリ
     if 'KEYSIGHT' in out or 'AGILENT' in out:  # KeysightまたはAgilentのデバイスの場合
         Osc = dev  # オシロスコープとして設定
-        Osc.timeout = conf.OscTimeout  # タイムアウトを設定
+        Osc.timeout = conf2.OscTimeout  # タイムアウトを設定
     elif 'NF Corporation' in out:  # NF Corporationのデバイスの場合
         FG = dev  # 関数ジェネレータとして設定
 
@@ -31,22 +31,22 @@ if not FG or not Osc:
 
 def InitialSetFG():
     # 関数ジェネレータの初期設定
-    FG.write(f":SOURce:FREQuency {conf.iFreq}")  # 周波数を設定
-    FG.write(f":SOURce:VOLTage {conf.Voltage}")  # 電圧を設定
+    FG.write(f":SOURce:FREQuency {conf2.iFreq}")  # 周波数を設定
+    FG.write(f":SOURce:VOLTage {conf2.Voltage}")  # 電圧を設定
     FG.write(":SOURce:MODulation:FM:STATe ON")  # 周波数変調をON
-    FG.write(f":SOURce:MODulation:FM:INTernal:FREQuency {conf.ModulationFreq}")  # 変調周波数を設定
-    FG.write(f":SOURce:MODulation:FM:DEViation {conf.iDeltaFreq}")  # 変調の偏差を設定
+    FG.write(f":SOURce:MODulation:FM:INTernal:FREQuency {conf2.ModulationFreq}")  # 変調周波数を設定
+    FG.write(f":SOURce:MODulation:FM:DEViation {conf2.iDeltaFreq}")  # 変調の偏差を設定
     FG.write(":OUTPut ON")  # 出力をON
 
 def InitialSetOsc():
     # オシロスコープの初期設定
     Osc.write(":CHANnel1:DISPlay ON")  # チャンネル1を表示
     Osc.write(":CHANnel2:DISPlay ON")  # チャンネル2を表示
-    Osc.write(f":TIMebase:RANGe {1/conf.ModulationFreq * conf.N_wave}")  # タイムベースの範囲を設定
+    Osc.write(f":TIMebase:RANGe {1/conf2.ModulationFreq * conf2.N_wave}")  # タイムベースの範囲を設定
     Osc.write(":TRIGger:LEVel 0.05")  # トリガーレベルを設定
     Osc.write(":TRIGger:EDGE:SOURce CHANnel1")  # トリガーソースをチャンネル1に設定
     Osc.write(":ACQuire:TYPE AVERage")  # 取得タイプを平均に設定
-    Osc.write(f":ACQuire:COUNt {conf.NAverage}")  # 平均回数を設定
+    Osc.write(f":ACQuire:COUNt {conf2.NAverage}")  # 平均回数を設定
 
 def GetEPRData():
     # EPRデータを取得
