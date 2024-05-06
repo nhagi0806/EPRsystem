@@ -9,26 +9,18 @@ rm = visa.ResourceManager()
 visa_list = rm.list_resources()
 print(visa_list)
 
-FG = None
-Osc = None
+#FG = None
+#Osc = None
 
-for dev_name in visa_list:
-    dev = rm.open_resource(dev_name)
-    out = dev.query('*IDN?')
-    if 'KEYSIGHT' in out or 'AGILENT' in out:
-        Osc = dev
-        Osc.timeout = conf2.OscTimeout
-    elif 'NF Corporation' in out:
-        FG = dev
+FG=rm.open_resource("USB0::0x0D4A::0x000D::9217876::INSTR")#Noda-san's FG
+Osc = rm.open_resource("USB0::0x0957::0x1798::MY61410321::INSTR")#New Keysight Oscillo  
 
-if not FG or not Osc:
-    print("Necessary devices are not connected.")
-    sys.exit()
 
 def InitialSetFG():
+    FG.write(":SOURce:MODE Modulation") 
+    FG.write(":SOURce:FUNCtion:SHAPe Sin") # 関数をsinに設定
     FG.write(f":SOURce:FREQuency {conf2.iFreq}")
     FG.write(f":SOURce:VOLTage {conf2.Voltage}")
-    FG.write(":SOURce:MODulation:FM:STATe ON")
     FG.write(f":SOURce:MODulation:FM:INTernal:FREQuency {conf2.ModulationFreq}")
     FG.write(f":SOURce:MODulation:FM:DEViation {conf2.iDeltaFreq}")
     FG.write(":OUTPut ON")

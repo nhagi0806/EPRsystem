@@ -7,7 +7,7 @@ visa_list = rm.list_resources()
 print(visa_list)
 FG=rm.open_resource("USB0::0x0D4A::0x000D::9217876::INSTR")#Noda-san's FG
 # 関数ジェネレータの初期化
-FG = None
+#FG = None
 
 '''
 def InitialSetFG():
