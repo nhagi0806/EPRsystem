@@ -5,25 +5,11 @@ rm = visa.ResourceManager()
 # 接続可能なリソースのリストを取得
 visa_list = rm.list_resources()
 print(visa_list)
-
+FG=rm.open_resource("USB0::0x0D4A::0x000D::9217876::INSTR")#Noda-san's FG
 # 関数ジェネレータの初期化
 FG = None
 
-# リスト内の各リソースについて処理
-for dev_name in visa_list:
-    # リソースをオープン
-    dev = rm.open_resource(dev_name)
-    # リソースから識別情報を取得
-    out = dev.query('*IDN?')
-    # KeysightまたはAgilentのデバイスであるかどうかをチェック
-    if 'KEYSIGHT' in out or 'AGILENT' in out:
-        FG = dev
-        break
 
-# 関数ジェネレータが見つからない場合は終了
-if not FG:
-    print("Function Generator not found.")
-    exit()
 
 def InitialSetFG():
     # 関数ジェネレータの初期設定
