@@ -25,6 +25,8 @@ def InitialSetFG():
 '''
 def InitialSetFG():
     # 関数ジェネレータの初期設定
+    FG.write(":SOURce:MODE Modulation") # 発信モードをバーストに設定
+    FG.write(":SOURce:FUNCtion:SHAPe sin") # 関数をsinに設定
     FG.write(f":SOURce:FREQuency {7500000}")  # 周波数を設定
     FG.write(f":SOURce:VOLTage {20}")  # 電圧を設定
     FG.write(":SOURce:MODulation:FM:STATe ON")  # 周波数変調をON
