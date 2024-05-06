@@ -9,6 +9,7 @@ FG=rm.open_resource("USB0::0x0D4A::0x000D::9217876::INSTR")#Noda-san's FG
 # 関数ジェネレータの初期化
 FG = None
 
+'''
 def InitialSetFG():
   FG.write(":SOURce:MODE BURSt") # 発信モードをバーストに設定
   FG.write(":SOURce:FUNCtion:SHAPe USER") # 関数を任意波形(user)に設定
@@ -21,8 +22,8 @@ def InitialSetFG():
   FG.write(":SOURce:FUNCtion:USER %i" % 40000)  # メモリから任意波形読み込み
   FG.write(":SOURce:VOLTage %f" % 2000) # 波形の振幅を設定
   FG.write(":OUTPut:SYNC:BURSt:TYPE BSYNc") # SYNC OUTの同期出力をバースト同期に設定
-
 '''
+
 def InitialSetFG():
     # 関数ジェネレータの初期設定
     FG.write(":SOURce:MODE Modulation") # 発信モードをバーストに設定
@@ -38,7 +39,6 @@ def InitialSetFG():
     # FG.write(":OUTPut OFF")  # 出力をOFFにする
 
 # もし、他の設定を追加したい場合は、上記のように FG.write() を使って追加します
-'''
 
 # InitialSetFG()を呼び出して関数ジェネレータの初期設定を行う
 InitialSetFG()
