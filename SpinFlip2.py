@@ -145,14 +145,6 @@ def GetOscInformation():
 
 
 def DataOutputToBinaryFile(Oscdata, BinaryFileName, OscInformation):
-  NPointLockin = 0
-  VLockin = []
-  TimeLockin = []
-  VLockintemp = 0
-  NPoint = 0
-  VMax = 0
-  MaxT = 0
-  NMean = 1000
   with open(BinaryFileName, mode='wb') as f:
     for iInfo in range(len(OscInformation)):
       f.write(struct.pack("f", OscInformation[iInfo]))
@@ -175,11 +167,8 @@ def DataOutputToParameterFile():
   
   
 def main(BinaryFileName):
-  # Check FG Setting
   print("Pulse Time : ", conf.ModulationTime, " Memory Number : ", conf.FGMemory)
   
-  ###############################
-  # Initialization
   print("Initialization of Oscilloscope")
   InitialSetOsc()  
   print("Initialization of Function Generator ")
@@ -188,33 +177,25 @@ def main(BinaryFileName):
   else:
     InitialSetFG()
 
-  ###############################
-  # Spin flip
   print("Flip!")
   Oscdata, date_1, date_2 = SpinFlip()
   
-  ####
-  # Get Osc Information (Origin, Reference, Increment) -> XYScale in Lockin.py    
   OscInformation = GetOscInformation()
   print("TOrigin: {0}, TReference: {1}, TIncrement: {2}".format(OscInformation[0], OscInformation[1], OscInformation[2]))
   print("VOrigin: {0}, VReference: {1}, VIncrement: {2}".format(OscInformation[3], OscInformation[4], OscInformation[5]))
   
-  # Start time to write file
   t = datetime.datetime.now()
   date_3 = str(t)[:-3]
   f_log = open(conf.FileNameLog, 'a')
   
-  # Write log
   date_line = "TRG IN: "+date_1+' TRG END :' + \
     date_2+' FILE WRITE START '+date_3+'\n'
   f_log.write(date_line)
   f_log.close()
     
-  # time of Output
   d_today = datetime.datetime.now()
   str(d_today.strftime('%H%M'))
   
-  # Data Output
   DataOutputToBinaryFile(Oscdata, BinaryFileName, OscInformation)
   DataOutputToParameterFile()  
   
