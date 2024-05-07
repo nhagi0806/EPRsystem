@@ -99,7 +99,7 @@ def GetOscInformation():
 def DataOutputToBinaryFile(OscData_CH2, OscData_CH3, BinaryFileName, OscInformation):
   with open(BinaryFileName, mode='wb') as f:
     # OscInformation の書き込み
-    for iInfo in OscInformation:
+    for iInfo in range(len(OscInformation)):
       f.write(struct.pack("f", iInfo))      
     # OscData_CH2 のデータを書き込み
     for iData2 in OscData_CH2:
