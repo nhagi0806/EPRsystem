@@ -31,7 +31,6 @@ def InitialSetFG():
 def InitialSetOsc():
   # ディスプレイの設定
   Osc.write(":RUN")                                                            # フロントパネルのRunを押す
-  #  Osc.write(":SYSTem:PRECision ON")                                         # 高精度測定モードだけど、2000-Xシリーズでは廃止されたコマンドのため不要
   Osc.write(":DISPlay:CLEar")                                                  # オシロの表示をリセット   
   Osc.write(":TIMebase:RANGe %f" % (conf.ModulationTime*conf.NSpinFlip))       # ウィンドウの水平方向のフルスケール。秒単位で設定。（時間分割設定の10倍）  
   Osc.write(":TIMebase:REFerence CENTer")                                      # 信号のディレイの基準点をCENTerにする。
