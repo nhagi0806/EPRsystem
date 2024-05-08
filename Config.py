@@ -111,3 +111,18 @@ FunctionRelaxation = "[0]*exp(-x/[1])*exp(-5.52/3600*x/76)"
 #Function = "[0]*(exp(-x/[1]))*exp(-x*6/4000)"
 InitialValueRelax   = [50e-3, 150]
 ParameterLimitRelax = [[0, 1], [0, 500]]
+
+
+#EPR
+Freq_EPR = 7500000
+Voltage_EPR=20
+ModulationFreq_EPR=1000000
+iDeltaFreq_EPR=1503
+
+OscWindowscale_EPR = 1
+#OscWindowscale_EPR = 1e-3
+OscDelayTime_EPR = 0
+OscTriggerLevel_EPR = 1              # Trigger level [V]
+OscChTrigger_EPR    = 3              # Osc channel for the sync out of the function generator
+OscAverage_EPR      = 64             # Number of times of average
+OscDataPoint_EPR    = 2e5            # Data points {100 | 250 | 500 | 1000 | 2000 | 5000 | 10000 | 20000 | 50000 | 100000 | 200000 | 500000 | 1000000}
