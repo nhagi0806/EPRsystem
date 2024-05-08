@@ -32,9 +32,9 @@ def InitialSetOsc():
   # ディスプレイの設定
   Osc.write(":RUN")                                                            # フロントパネルのRunを押す
   Osc.write(":DISPlay:CLEar")                                                  # オシロの表示をリセット   
-  Osc.write(":TIMebase:RANGe %f" % (conf.ModulationTime*conf.NSpinFlip))       # ウィンドウの水平方向のフルスケール。秒単位で設定。（時間分割設定の10倍）  
+  Osc.write(":TIMebase:RANGe %f" % (conf2.OscWindowscale))       # ウィンドウの水平方向のフルスケール。秒単位で設定。（時間分割設定の10倍）  
   Osc.write(":TIMebase:REFerence CENTer")                                      # 信号のディレイの基準点をCENTerにする。
-  Osc.write(":TIMebase:POSition %f" % (conf.ModulationTime*conf.NSpinFlip/2.)) # トリガーと基準点と時間間隔（DELayコマンドは廃止のため換えた）。
+  Osc.write(":TIMebase:POSition %f" % (conf2.OscDelayTime)) # トリガーと基準点と時間間隔（DELayコマンドは廃止のため換えた）。
   
   # チャンネルの設定
   Osc.write(":CHANnel1:DISPlay 1")                                             # ChannelのON/OFFボタン (Monitor)
@@ -47,18 +47,18 @@ def InitialSetOsc():
   Osc.write(":CHANnel4:OFFSet 0 V")                                            # Channelのオフセット  
   
   # トリガーの設定
-  Osc.write(":MTESt:TRIGger:SOURce CHANnel%d" % (conf.OscChTrigger))           # Trigger(FGのSync out)を入れるチャンネル  
-  Osc.write(":TRIGger:EDGE:LEVel %f" % (conf.OscTriggerLevel))                 # トリガーレベル
+  Osc.write(":MTESt:TRIGger:SOURce CHANnel%d" % (conf2.OscChTrigger))           # Trigger(FGのSync out)を入れるチャンネル  
+  Osc.write(":TRIGger:EDGE:LEVel %f" % (conf2.OscTriggerLevel))                 # トリガーレベル
   Osc.write(":TRIGger:SLOPe NEGative")                                         # トリガースロープを立ち下がりに設定  
 
   
   Osc.write(":ACQuire:TYPE Average")                                         # Average mode
-  Osc.write(":ACQuire:COUNt %d" % (conf.OscAverage))                         # 波形の平均化数を設定。:MTESt:AVERage:COUNtコマンドは廃止のため換えた。
+  Osc.write(":ACQuire:COUNt %d" % (conf2.OscAverage))                         # 波形の平均化数を設定。:MTESt:AVERage:COUNtコマンドは廃止のため換えた。
 
   # データ取得の設定
   Osc.write(":ACQuire:COMPlete 100")                                           # 取り込みの最小完了基準を指定。
   Osc.write(":WAVeform:FORMat BYTE")                                           # バイナリ形式で保存する。
-  Osc.write(":WAVeform:POINts %d" % (conf.OscDataPoint))                       # 波形のポイント数を指定。
+  Osc.write(":WAVeform:POINts %d" % (conf2.OscDataPoint))                       # 波形のポイント数を指定。
   Osc.write(":WAVeform:POINts:MODE MAXimum")                                   # 波形の最大ポイント数？  
   Osc.write(":STOP")                                                           # フロントパネルのStopを押す (これはなんのため？)
   Osc.write(":RUN")                                                            # フロントパネルのRunを押す (これはなんのため？)
@@ -110,16 +110,16 @@ def DataOutputToBinaryFile(OscData_CH2, OscData_CH3, BinaryFileName, OscInformat
 def DataOutputToParameterFile():
   NowTime = datetime.datetime.now()
   DataDictionary = dict(Time=[NowTime],
-                        TimeInterval=[conf.TimeInterval],
-                        Voltage=[conf.FGVoltage],
+                        TimeInterval=[conf2.TimeInterval],
+                        Voltage=[conf2.FGVoltage],
                         FunctionGenerator=[FG],
                         Oscilloscope=[Osc],
-                        FreqRange=[conf.FreqRange])
+                        FreqRange=[conf2.FreqRange])
   df = pd.DataFrame(data=DataDictionary)
   
   # output
-  header = FileInfo.addHeader(conf.FileNameParameter)
-  df.to_csv(conf.FileNameParameter, mode="a", index=False, header=header)
+  header = FileInfo.addHeader(conf2.FileNameParameter)
+  df.to_csv(conf2.FileNameParameter, mode="a", index=False, header=header)
 
 def main(BinaryFileName):
   print("Pulse Time : ", conf.ModulationTime, " Memory Number : ", conf.FGMemory)
@@ -138,7 +138,7 @@ def main(BinaryFileName):
   
   t = datetime.datetime.now()
   date_3 = str(t)[:-3]
-  f_log = open(conf.FileNameLog, 'a')
+  f_log = open(conf2.FileNameLog, 'a')
   
   date_line = "FILE WRITE START " + date_3 + '\n'
   f_log.write(date_line)
@@ -154,5 +154,5 @@ if __name__ == "__main__":
   
   os.makedirs(conf.DataPath, exist_ok=True)
   FileNo = FileInfo.GetMaxFileNumber() + 1
-  BinaryFileName = conf.DataPath + str(FileNo).zfill(4) + ".bin"
+  BinaryFileName = conf2.DataPath + str(FileNo).zfill(4) + ".bin"
   main(BinaryFileName)  
