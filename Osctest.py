@@ -1,4 +1,5 @@
 import pyvisa as visa
+import Config as conf
 # リソースマネージャーを初期化
 rm = visa.ResourceManager()
 
