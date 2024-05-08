@@ -8,6 +8,8 @@ import datetime
 import pandas as pd
 import FileInfo
 
+start_time = time.time()                                                    # プログラム開始時のタイムスタンプを記録
+
 rm = visa.ResourceManager()                                                 # VISAリソースマネージャをインスタンス化
 visa_list = rm.list_resources()                                             # 利用可能なVISAリソース(機器)のリストを取得
 print(visa_list)                                                            # 機器リストを出力
@@ -118,22 +120,27 @@ def DataOutputToParameterFile():
   df.to_csv(conf.FileNameParameter, mode="a", index=False, header=header)
 
 def main(BinaryFileName):
-  print("Pulse Time : ", conf.ModulationTime, " Memory Number : ", conf.FGMemory)
-  print("Initialization of Oscilloscope")
-  print("A")
+  #print("Pulse Time : ", conf.ModulationTime, " Memory Number : ", conf.FGMemory)
+  #print("Initialization of Oscilloscope")
   InitialSetOsc()
+  elapsed_time_A = time.time() - start_time
+  print(f"Elapsed time after Initialization of Oscilloscope: {elapsed_time_A:.2f} seconds")
+
   print("Initialization of Function Generator ")
   InitialSetFG()
-  print("B")
+  elapsed_time_B = time.time() - start_time
+  print(f"Elapsed time after Initialization of Function Generator: {elapsed_time_B:.2f} seconds")
 
-  print("EPR Get")
+  #print("EPR Get")
   OscData_CH2, OscData_CH3 = EPR()
-  print("C")
+  elapsed_time_C = time.time() - start_time
+  print(f"Elapsed time after EPR Get: {elapsed_time_C:.2f} seconds")
 
   OscInformation = GetOscInformation()
-  print("D")
-  print("TOrigin: {0}, TReference: {1}, TIncrement: {2}".format(OscInformation[0], OscInformation[1], OscInformation[2]))
-  print("VOrigin: {0}, VReference: {1}, VIncrement: {2}".format(OscInformation[3], OscInformation[4], OscInformation[5]))
+  #print("TOrigin: {0}, TReference: {1}, TIncrement: {2}".format(OscInformation[0], OscInformation[1], OscInformation[2]))
+  #print("VOrigin: {0}, VReference: {1}, VIncrement: {2}".format(OscInformation[3], OscInformation[4], OscInformation[5]))
+  elapsed_time_D = time.time() - start_time
+  print(f"Elapsed time after Get Osc Information: {elapsed_time_D:.2f} seconds")
 
   t = datetime.datetime.now()
   date_3 = str(t)[:-3]
@@ -141,23 +148,36 @@ def main(BinaryFileName):
   date_line = "FILE WRITE START " + date_3 + '\n'
   f_log.write(date_line)
   f_log.close()
-  print("E")
+  elapsed_time_E = time.time() - start_time
+  print(f"Elapsed time after log write: {elapsed_time_E:.2f} seconds")
 
   d_today = datetime.datetime.now()
   str(d_today.strftime('%H%M'))
-  print("F")
+  elapsed_time_F = time.time() - start_time
+  print(f"Elapsed time after data time write: {elapsed_time_F:.2f} seconds")
 
   DataOutputToBinaryFile(OscData_CH2, OscData_CH3, BinaryFileName, OscInformation)
+  elapsed_time_G = time.time() - start_time
+  print(f"Elapsed time after Binary File Output: {elapsed_time_G:.2f} seconds")
+
   DataOutputToParameterFile()
-  print("G")
+  elapsed_time_H = time.time() - start_time
+  print(f"Elapsed time after Parameter File Output: {elapsed_time_H:.2f} seconds") 
 
 if __name__ == "__main__":
   # スクリプトが直接実行された場合の処理
   os.makedirs(conf.DataPath, exist_ok=True)                                 # データ保存ディレクトリを作成（存在しない場合）
-  print("s")
-  FileNo = FileInfo.GetMaxFileNumber() + 1
-  print("ss")                                  # 新しいファイル番号を取得
+  elapsed_time_s = time.time() - start_time
+  print(f"Elapsed time after makedirs: {elapsed_time_s:.2f} seconds") 
+
+  FileNo = FileInfo.GetMaxFileNumber() + 1                                  # 新しいファイル番号を取得
+  elapsed_time_ss = time.time() - start_time
+  print(f"Elapsed time after File No: {elapsed_time_ss:.2f} seconds")                                  
+
   BinaryFileName = conf.DataPath + str(FileNo).zfill(4) + ".bin"            # 新しいバイナリファイル名を生成
-  print("sss")
+  elapsed_time_sss = time.time() - start_time
+  print(f"Elapsed time after Binary File Name: {elapsed_time_sss:.2f} seconds")   
+
   main(BinaryFileName)                                                      # メイン関数を実行
-  print("ssss")
+  elapsed_time_ssss = time.time() - start_time
+  print(f"Elapsed time after main: {elapsed_time_ssss:.2f} seconds")   
