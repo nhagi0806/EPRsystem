@@ -7,7 +7,7 @@ import Const as const
 const.StartTime = datetime.datetime.now()
 
 # Path name
-DataDirectryName = "/Data/AFPNMR/2024/0418/RoomA_BL18Onbeam_natXe3atm_Test/"
+DataDirectryName = "Data/AFPNMR/2024/0418/RoomA_BL18Onbeam_natXe3atm_Test/"
 
 HomePath         = os.path.expanduser("~")
 DataPath         = HomePath + "/Research/" + DataDirectryName
