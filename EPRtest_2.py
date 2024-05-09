@@ -109,7 +109,7 @@ def GetOscInformation():
 
 def DataOutputToBinaryFile(OscData_CH2, OscData_CH3, Time, NPoint, TextFileName):
   # バイナリファイルへのデータ出力
-  with open(TextFileName) as f:
+  with open(TextFileName,mode="a") as f:
     for i in range(NPoint):
       f.write("%f %f %f\n" %(Time[i], OscData_CH2[i], OscData_CH3[i]))
 
