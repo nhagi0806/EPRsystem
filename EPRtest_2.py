@@ -31,7 +31,7 @@ def InitialSetFG():
 def InitialSetOsc():
   # オシロスコープの初期設定
   Osc.write(":RUN")                                                         # フロントパネルのRunを押す
-  Osc.write(":DISPlay:CLEar")  # オシロの表示をリセット
+  Osc.write(":DISPlay:CLEar")                                               # オシロの表示をリセット
   Osc.write(":TIMebase:RANGe %f" % (conf.OscWindowscale_EPR))               # ウィンドウの水平方向のフルスケールを秒単位で設定
   Osc.write(":TIMebase:REFerence CENTer")                                   # 信号のディレイの基準点を中央にする
   Osc.write(":TIMebase:POSition %f" % (conf.OscDelayTime_EPR))              # トリガーと基準点の時間間隔を設定
@@ -56,34 +56,46 @@ def InitialSetOsc():
   Osc.write(":ACQuire:COUNt %d" % (conf.OscAverage_EPR))                    # 平均化数を設定
   Osc.write(":ACQuire:COMPlete 100")                                        # 取り込みの完了基準を100%に設定
   Osc.write(":WAVeform:FORMat BYTE")                                        # データ形式をバイト形式に設定
+  Osc.write(":WAVeform:FORMat ASCII")
   Osc.write(":WAVeform:POINts %d" % (conf.OscDataPoint_EPR))                # 波形のポイント数を設定
   Osc.write(":WAVeform:POINts:MODE MAXimum")                                # 取得する波形ポイントの最大数を使用
   Osc.write(":STOP")                                                        # フロントパネルのStopを押す
   Osc.write(":RUN")                                                         # フロントパネルのRunを押す
   Osc.write(":TRIGger:SWEep Normal")                                        # トリガーモードをNormalに設定
-  Osc.write(":DIGitize")                                                    # データ取得を開始
+  Osc.write(":DIGitize CHANnel1") 
+  Osc.write(":DIGitize CHANnel3")                                                 # データ取得を開始
 
 
 def EPR():
   # EPR測定のための波形取得処理
-  FG.write("OUTPut:STATe ON")  # ファンクションジェネレータの出力をON
-  time.sleep(5)  # アベレージのために少し待つ
+  print("EPR Start")
+  FG.write("OUTPut:STATe ON")                                               # ファンクションジェネレータの出力をON
+  time.sleep(2)                                                             # アベレージのために少し待つ
 
-  # オシロスコープからチャンネル2のデータを取得
+  # オシロスコープからチャンネル2と3のデータを取得
   Osc.write(":WAVeform:SOURce CHANnel2")
-  # ASCIIデータを取得し、最初の10行をスキップ
-  data2 = Osc.query(":WAVeform:DATA?")
-  OscData_CH2 = [float(val) for val in data2.split(",")[10:]]
+  value = Osc.query(":WAVeform:DATA?")
+  OscData_CH2=value.split(",")
+  OscData_CH2[0]=OscData_CH2[0][10:]
+  OscData_CH2=list(map(float, OscData_CH2))
+  NPoint=len(OscData_CH2)
 
-  # オシロスコープからチャンネル3のデータを取得
   Osc.write(":WAVeform:SOURce CHANnel3")
-  # ASCIIデータを取得し、最初の10行をスキップ
-  data3 = Osc.query(":WAVeform:DATA?")
-  OscData_CH3 = [float(val) for val in data3.split(",")[10:]]
+  value2 = Osc.query(":WAVeform:DATA?") 
+  OscData_CH3=value2.split(",")
+  OscData_CH3[0]=OscData_CH3[0][10:]
+  OscData_CH3=list(map(float, OscData_CH3))
 
-  FG.write("OUTPut:STATe OFF")  # ファンクションジェネレータの出力をOFF
+  TOrigin = float(Osc.query("WAVeform:XORigin?"))                           # 最初のデータ点の時間
+  TReference = float(Osc.query("WAVeform:XREFerence?"))                     # 時間基準点
+  TIncrement = float(Osc.query("WAVeform:XINCrement?"))                     # 時間間隔
 
-  return OscData_CH2, OscData_CH3
+  Time=[(i-TReference)*TIncrement+TOrigin for i in range(NPoint)]
+
+
+  FG.write("OUTPut:STATe OFF")                                              # ファンクションジェネレータの出力をOFF
+  
+  return OscData_CH2, OscData_CH3,Time, NPoint
 
 def GetOscInformation():
   # オシロスコープからのデータに関する情報を取得
@@ -96,16 +108,11 @@ def GetOscInformation():
   
   return TOrigin, TReference, TIncrement, VOrigin, VReference, VIncrement
 
-def DataOutputToTextFile(OscData_CH2, OscData_CH3, TextFileName, OscInformation):
-  # テキストファイルへのデータ出力
-  with open(TextFileName, mode='w') as f:
-    # オシロスコープ情報の書き込み
-    f.write("TOrigin: {:.6f}, TReference: {:.6f}, TIncrement: {:.6f}, VOrigin: {:.6f}, VReference: {:.6f}, VIncrement: {:.6f}\n".format(*OscInformation))
-        
-    # チャンネル2と3のデータをテキスト形式で書き込み
-    for data2, data3 in zip(OscData_CH2, OscData_CH3):
-      f.write("{}, {}\n".format(data2, data3))
-
+def DataOutputToBinaryFile(OscData_CH2, OscData_CH3, Time, NPoint, TextFileName):
+  # バイナリファイルへのデータ出力
+  with open(TextFileName) as f:
+    for i in range(NPoint):
+      f.write("%f %f %f\n" %(Time[i], OscData_CH2[i], OscData_CH3[i]))
 
 def DataOutputToParameterFile():
   # パラメータファイルへの出力処理
@@ -125,14 +132,14 @@ def DataOutputToParameterFile():
   df.to_csv(conf.FileNameParameter, mode="a", index=False, header=header)
 
 def main(TextFileName):
-  print("Pulse Time : ", conf.ModulationTime, " Memory Number : ", conf.FGMemory)
+  #print("Pulse Time : ", conf.ModulationTime, " Memory Number : ", conf.FGMemory)
   print("Initialization of Oscilloscope")
   InitialSetOsc()
   print("Initialization of Function Generator ")
   InitialSetFG()
 
+  OscData_CH2, OscData_CH3,Time, NPoint = EPR()
   print("EPR Get")
-  OscData_CH2, OscData_CH3 = EPR()
 
   OscInformation = GetOscInformation()
   print("TOrigin: {0}, TReference: {1}, TIncrement: {2}".format(OscInformation[0], OscInformation[1], OscInformation[2]))
@@ -148,14 +155,13 @@ def main(TextFileName):
   d_today = datetime.datetime.now()
   str(d_today.strftime('%H%M'))
 
-  DataOutputToTextFile(OscData_CH2, OscData_CH3, TextFileName, OscInformation)
+  DataOutputToBinaryFile(OscData_CH2, OscData_CH3, Time, NPoint, TextFileName)
   DataOutputToParameterFile()
 
 if __name__ == "__main__":
   # スクリプトが直接実行された場合の処理
   os.makedirs(conf.DataPath, exist_ok=True)                                 # データ保存ディレクトリを作成（存在しない場合）
   FileNo = FileInfo.GetMaxFileNumber() + 1                                  # 新しいファイル番号を取得
-  TextFileName = conf.DataPath + str(FileNo).zfill(4) + ".txt"            # 新しいテキストファイル名を生成
-  main(TextFileName)                                                        # メイン関数を実行
-
+  TextFileName = conf.DataPath + str(FileNo).zfill(4) + ".text"            # 新しいバイナリファイル名を生成
+  main(TextFileName)                                                      # メイン関数を実行
 
