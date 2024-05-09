@@ -151,3 +151,4 @@ if __name__ == "__main__":
   FileNo = FileInfo.GetMaxFileNumber() + 1                                  # 新しいファイル番号を取得
   BinaryFileName = conf.DataPath + str(FileNo).zfill(4) + ".bin"            # 新しいバイナリファイル名を生成
   main(BinaryFileName)                                                      # メイン関数を実行
+
