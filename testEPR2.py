@@ -7,6 +7,13 @@ import Config as conf
 import datetime
 import pandas as pd
 import FileInfo
+import sys
+
+argvs = sys.argv  
+argc = len(argvs) 
+DataDirectryName = "/Data/AFPNMR/2024/0509/Runtest/"
+HomePath         = os.path.expanduser("~")
+EPRsignal_path   = HomePath + "/Research/" + DataDirectryName
 
 rm = visa.ResourceManager()                                                 # VISAリソースマネージャをインスタンス化
 visa_list = rm.list_resources()                                             # 利用可能なVISAリソース(機器)のリストを取得
@@ -14,6 +21,12 @@ print(visa_list)                                                            # �
 
 FG = None                                                                   # ファンクションジェネレータのための変数を初期化
 Osc = None                                                                  # オシロスコープのための変数を初期化
+
+NAverage=64
+Query_delay = 0
+TOrigin=float(Osc.query("WAVeform:XORigin?"))
+TReference=float(Osc.query("WAVeform:XREFerence?"))
+TIncrement=float(Osc.query("WAVeform:XINCrement?"))
 
 # ファンクションジェネレータとオシロスコープのリソースをオープン
 FG=rm.open_resource("USB0::0x0D4A::0x000D::9217876::INSTR")                 # ノダさんのファンクションジェネレータ
@@ -52,8 +65,6 @@ def InitialSetOsc():
   Osc.write(":TRIGger:SLOPe NEGative")                                      # トリガーの立ち下がりエッジを検出
 
   # データ取得の設定
-  Osc.write(":ACQuire:TYPE Average")                                        # 平均化モードを使用
-  Osc.write(":ACQuire:COUNt %d" % (conf.OscAverage_EPR))                    # 平均化数を設定
   Osc.write(":ACQuire:COMPlete 100")                                        # 取り込みの完了基準を100%に設定
   Osc.write(":WAVeform:FORMat BYTE")                                        # データ形式をバイト形式に設定
   Osc.write(":WAVeform:POINts %d" % (conf.OscDataPoint_EPR))                # 波形のポイント数を設定
@@ -63,74 +74,57 @@ def InitialSetOsc():
   Osc.write(":TRIGger:SWEep Normal")                                        # トリガーモードをNormalに設定
   Osc.write(":DIGitize")                                                    # データ取得を開始
 
+def AverageSetOsc(NorA, Avecount):
+    if(NorA=="N"): Osc.write(":ACQuire:TYPE Normal")
+    if(NorA=="A"):
+        Osc.write(":ACQuire:TYPE Average")
+        Osc.write(":MTESt:AVERage:COUNt %d" %(Avecount))
 
 def EPR():
   # EPR測定のための波形取得処理
+  AverageSetOsc("A", NAverage)
   FG.write("OUTPut:STATe ON")                                               # ファンクションジェネレータの出力をON
-  time.sleep(5)                                                             # アベレージのために少し待つ
+  #time.sleep(5)                                                             # アベレージのために少し待つ
 
   # オシロスコープからチャンネル2と3のデータを取得
-  Osc.write(":WAVeform:SOURce CHANnel2")
-  OscData_CH2 = Osc.query_binary_values(":WAVeform:DATA?", datatype='B')
+  Osc.write(":WAVeform:SOURce CHANnel1")
+  print("wrote")
+  value=Osc.query(":WAVeform:DATA?", delay = Query_delay)  #delayはmsで書かれる
+  V=value.split(",")
+  V[0]=V[0][10:]
+  V=list(map(float, V))
+  NPoint=len(V)
+
+  AverageSetOsc("N", 0)
   Osc.write(":WAVeform:SOURce CHANnel3")
-  OscData_CH3 = Osc.query_binary_values(":WAVeform:DATA?", datatype='B')
+  value2=Osc.query(":WAVeform:DATA?")
+  VSync=value2.split(",")
+  VSync[0]=VSync[0][10:]
+  VSync=list(map(float, VSync))
+
+  VCurrent=1 #Meter.query(":Measure:Current?")  
+  VCurrent=float(VCurrent)
+
+  Time=[(i-TReference)*TIncrement+TOrigin for i in range(NPoint)]
+
+    # 得た電圧の情報をテキストファイルに書き込む.
+  if argc == 3:
+    f=open(EPRsignal_path + argvs[2],"a")
+    for i in range(NPoint):
+        f.write("%f %f %f\n" %(Time[i], V[i], VSync[i]))
+    f.close()
+
   FG.write("OUTPut:STATe OFF")                                              # ファンクションジェネレータの出力をOFF
-  
-  return OscData_CH2, OscData_CH3
-
-def GetOscInformation():
-  # オシロスコープからのデータに関する情報を取得
-  TOrigin = float(Osc.query("WAVeform:XORigin?"))                           # 最初のデータ点の時間
-  TReference = float(Osc.query("WAVeform:XREFerence?"))                     # 時間基準点
-  TIncrement = float(Osc.query("WAVeform:XINCrement?"))                     # 時間間隔
-  VOrigin = float(Osc.query("WAVeform:YORigin?"))                           # 縦軸の原点
-  VReference = float(Osc.query("WAVeform:YREFerence?"))                     # 縦軸の参照点
-  VIncrement = float(Osc.query("WAVeform:YINCrement?"))                     # 縦軸のインクリメント
-  
-  return TOrigin, TReference, TIncrement, VOrigin, VReference, VIncrement
-
-def DataOutputToBinaryFile(OscData_CH2, OscData_CH3, BinaryFileName, OscInformation):
-  # バイナリファイルへのデータ出力
-  with open(BinaryFileName, mode='wb') as f:
-    # オシロスコープ情報の書き込み
-    for iInfo in range(len(OscInformation)):
-      f.write(struct.pack("f", iInfo))      
-    # チャンネル2と3のデータをバイナリ形式で書き込み
-    for iData2 in OscData_CH2:
-      f.write(struct.pack("B", iData2))
-    for iData3 in OscData_CH3:
-      f.write(struct.pack("B", iData3))
-
-def DataOutputToParameterFile():
-  # パラメータファイルへの出力処理
-  NowTime = datetime.datetime.now()                                         # 現在の日時を取得
-  DataDictionary = dict(
-    Time=[NowTime],
-    TimeInterval=[conf.TimeInterval],
-    Voltage=[conf.FGVoltage],
-    FunctionGenerator=[FG],
-    Oscilloscope=[Osc],
-    FreqRange=[conf.FreqRange]
-  )
-  df = pd.DataFrame(data=DataDictionary)                                    # データフレームの作成
-  
-  # パラメータファイルへの出力
-  header = FileInfo.addHeader(conf.FileNameParameter)
-  df.to_csv(conf.FileNameParameter, mode="a", index=False, header=header)
 
 def main(BinaryFileName):
-  print("Pulse Time : ", conf.ModulationTime, " Memory Number : ", conf.FGMemory)
+  #print("Pulse Time : ", conf.ModulationTime, " Memory Number : ", conf.FGMemory)
   print("Initialization of Oscilloscope")
   InitialSetOsc()
   print("Initialization of Function Generator ")
   InitialSetFG()
 
   print("EPR Get")
-  OscData_CH2, OscData_CH3 = EPR()
-
-  OscInformation = GetOscInformation()
-  print("TOrigin: {0}, TReference: {1}, TIncrement: {2}".format(OscInformation[0], OscInformation[1], OscInformation[2]))
-  print("VOrigin: {0}, VReference: {1}, VIncrement: {2}".format(OscInformation[3], OscInformation[4], OscInformation[5]))
+  EPR()
 
   t = datetime.datetime.now()
   date_3 = str(t)[:-3]
@@ -142,12 +136,5 @@ def main(BinaryFileName):
   d_today = datetime.datetime.now()
   str(d_today.strftime('%H%M'))
 
-  DataOutputToBinaryFile(OscData_CH2, OscData_CH3, BinaryFileName, OscInformation)
-  DataOutputToParameterFile()
-
 if __name__ == "__main__":
-  # スクリプトが直接実行された場合の処理
-  os.makedirs(conf.DataPath, exist_ok=True)                                 # データ保存ディレクトリを作成（存在しない場合）
-  FileNo = FileInfo.GetMaxFileNumber() + 1                                  # 新しいファイル番号を取得
-  BinaryFileName = conf.DataPath + str(FileNo).zfill(4) + ".bin"            # 新しいバイナリファイル名を生成
-  main(BinaryFileName)                                                      # メイン関数を実行
+  main()                                                      # メイン関数を実行
