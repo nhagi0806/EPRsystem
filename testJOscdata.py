@@ -4,7 +4,7 @@ from datetime import datetime
 import pandas as pd
 
 
-VISAAddr = "USB0::___::____::INSTR" #rm.list_resources()にて得られる接続先のアドレス
+VISAAddr = "USB0::0x0957::0x1798::MY61410321::INSTR" #rm.list_resources()にて得られる接続先のアドレス
 MAX_CH = 4     #オシロスコープの最大チャンネル数
 ch_en=[]
 IsFirstCh = False
