@@ -68,14 +68,31 @@ def InitialSetOsc():
 def EPR():
   # EPR測定のための波形取得処理
   FG.write("OUTPut:STATe ON")                                               # ファンクションジェネレータの出力をON
-  time.sleep(5)                                                             # アベレージのために少し待つ
+  elapsed_time_1 = time.time() - start_time
+  print(f"Elapsed time after FG OUTPUT ON: {elapsed_time_1:.2f} seconds")
+
+  #time.sleep(5)                                                            # アベレージのために少し待つ
 
   # オシロスコープからチャンネル2と3のデータを取得
   Osc.write(":WAVeform:SOURce CHANnel2")
+  elapsed_time_2 = time.time() - start_time
+  print(f"Elapsed time after write waveform CH2: {elapsed_time_2:.2f} seconds")
+
   OscData_CH2 = Osc.query_binary_values(":WAVeform:DATA?", datatype='B')
+  elapsed_time_3 = time.time() - start_time
+  print(f"Elapsed time after query binary value CH2: {elapsed_time_3:.2f} seconds")
+
   Osc.write(":WAVeform:SOURce CHANnel3")
+  elapsed_time_4 = time.time() - start_time
+  print(f"Elapsed time after write waveform CH3: {elapsed_time_4:.2f} seconds")
+
   OscData_CH3 = Osc.query_binary_values(":WAVeform:DATA?", datatype='B')
+  elapsed_time_5 = time.time() - start_time
+  print(f"Elapsed time after query binary value CH3: {elapsed_time_5:.2f} seconds")
+
   FG.write("OUTPut:STATe OFF")                                              # ファンクションジェネレータの出力をOFF
+  elapsed_time_6 = time.time() - start_time
+  print(f"Elapsed time after FG OUTPUT OFF: {elapsed_time_6:.2f} seconds")
   
   return OscData_CH2, OscData_CH3
 
