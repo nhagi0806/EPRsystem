@@ -223,7 +223,7 @@ def DataOutputToParameterFile():
   header = FileInfo.addHeader(conf.FileNameParameter)
   df.to_csv(conf.FileNameParameter, mode="a", index=False, header=header)
 
-def main(BinaryFileName):
+def main():
     for i in range(2):
         FileNo = FileInfo.GetMaxFileNumber() + 1
         BinaryFileName = conf.DataPath + str(FileNo).zfill(4) + ".bin"
