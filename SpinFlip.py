@@ -59,20 +59,17 @@ def InitialSetFG_WideRangeScan():
   FG.write(":SOURce:FUNCtion:SHAPe SINusoid") # 関数を任意波形(user)に設定
   FG.write(":SOURce:SWEep:MODE GATed") # ゲーテッド単発
   FG.write(":TRIGger:SWEep:SOURce EXTernal") # 外部トリガー設定
-  #  FG.write(":TRIGger:SWEep:SLOPe NEGative")
   FG.write(":TRIGger:SWEep:SLOPe OFF") # 外部トリガーの極性をOFFにしておくと、外来ノイズによる誤動作が避けられる
   FG.write(":SOURce:SWEep:TIME %f" % conf.ModulationTime) # スイープ時間設定
   FG.write(":SOURce:FREQuency:STARt %f" % conf.StartFreq) # 周波数開始値
   FG.write(":SOURce:FREQuency:STOP %f" % conf.StopFreq) # 周波数停止値
   FG.write(":SOURce:VOLTage %f" % conf.FGVoltage) # 波形の振幅を設定
-  #  FG.write(":OUTPut:SYNC:SWEep:TYPE XDRive") # SYNC OUTの同期出力をマーカに設定
   FG.write(":OUTPut:SYNC:SWEep:TYPE MARker") # SYNC OUTの同期出力をマーカに設定
 
 # Takada SetOsc
 def InitialSetOsc():
   # ディスプレイの設定
   Osc.write(":RUN")                                                            # フロントパネルのRunを押す
-  #  Osc.write(":SYSTem:PRECision ON")                                         # 高精度測定モードだけど、2000-Xシリーズでは廃止されたコマンドのため不要
   Osc.write(":DISPlay:CLEar")                                                  # オシロの表示をリセット   
   Osc.write(":TIMebase:RANGe %f" % (conf.ModulationTime*conf.NSpinFlip))       # ウィンドウの水平方向のフルスケール。秒単位で設定。（時間分割設定の10倍）  
   Osc.write(":TIMebase:REFerence CENTer")                                      # 信号のディレイの基準点をCENTerにする。
@@ -139,60 +136,27 @@ def GetOscInformation():
   TOrigin = float(Osc.query("WAVeform:XORigin?"))       # 最初のデータ点の X 軸値
   TReference = float(Osc.query("WAVeform:XREFerence?")) # 指定されているソース(signal=ch2)の時間基準点
   TIncrement = float(Osc.query("WAVeform:XINCrement?")) # データポイント間の時間差
-  #  print(TOrigin, TReference, TIncrement)
   
   VOrigin = float(Osc.query("WAVeform:YORigin?"))       # 縦軸の原点 (原点から正方向にずらしていたら負)
   VReference = float(Osc.query("WAVeform:YREFerence?")) # どこを指してるのかよくわからない
   VIncrement = float(Osc.query("WAVeform:YINCrement?")) # 1bitが何Vか
-  #  print(VOrigin, VReference, VIncrement)
   
   return TOrigin, TReference, TIncrement, VOrigin, VReference, VIncrement
 
 
 def DataOutputToBinaryFile(Oscdata, BinaryFileName, OscInformation):
-  ####
-  # Variables in this program
-  NPointLockin = 0
-  VLockin = []
-  TimeLockin = []
-  VLockintemp = 0
-  NPoint = 0
-  VMax = 0
-  MaxT = 0
-  NMean = 1000
   with open(BinaryFileName, mode='wb') as f:
     for iInfo in range(len(OscInformation)):
       f.write(struct.pack("f", OscInformation[iInfo]))
-      """
-      f.write(struct.pack("f", TOrigin))
-      f.write(struct.pack("f", TReference))
-      f.write(struct.pack("f", TIncrement))
-      f.write(struct.pack("f", VOrigin))
-      f.write(struct.pack("f", VReference))
-      f.write(struct.pack("f", VIncrement))
-      """
     for iData in Oscdata:
       f.write(struct.pack("B", iData))
-      """
-      VLockintemp=VLockintemp+((value[j]-VReference)*VIncrement+VOrigin)*((value[j]-VReference)*VIncrement+VOrigin)
-      if(j%NMean==0 and j!=0):
-      VLockin.append((VLockintemp/NMean))
-      TimeLockin.append((j-TReference)*TIncrement+TOrigin)
-      if(VLockintemp/NMean>VMax):
-      VMax=VLockintemp/NMean
-      MaxT=(j-TReference)*TIncrement+TOrigin
-      NPointLockin=NPointLockin+1
-      VLockintemp=0
-      """
     
 def DataOutputToParameterFile():
   NowTime = datetime.datetime.now()
   DataDictionary = dict(Time=[NowTime],
                         TimeInterval=[conf.TimeInterval],
                         Voltage=[conf.FGVoltage],
-                        #                        FunctionGenerator=[conf.FGName],
                         FunctionGenerator=[FG],
-                        #                        Oscilloscope=[conf.OscName],
                         Oscilloscope=[Osc],
                         FreqRange=[conf.FreqRange])
   df = pd.DataFrame(data=DataDictionary)
@@ -203,12 +167,8 @@ def DataOutputToParameterFile():
   
   
 def main(BinaryFileName):
-  #def main():    
-  # Check FG Setting
   print("Pulse Time : ", conf.ModulationTime, " Memory Number : ", conf.FGMemory)
   
-  ###############################
-  # Initialization
   print("Initialization of Oscilloscope")
   InitialSetOsc()  
   print("Initialization of Function Generator ")
@@ -217,33 +177,25 @@ def main(BinaryFileName):
   else:
     InitialSetFG()
 
-  ###############################
-  # Spin flip
   print("Flip!")
   Oscdata, date_1, date_2 = SpinFlip()
   
-  ####
-  # Get Osc Information (Origin, Reference, Increment) -> XYScale in Lockin.py    
   OscInformation = GetOscInformation()
   print("TOrigin: {0}, TReference: {1}, TIncrement: {2}".format(OscInformation[0], OscInformation[1], OscInformation[2]))
   print("VOrigin: {0}, VReference: {1}, VIncrement: {2}".format(OscInformation[3], OscInformation[4], OscInformation[5]))
   
-  # Start time to write file
   t = datetime.datetime.now()
   date_3 = str(t)[:-3]
   f_log = open(conf.FileNameLog, 'a')
   
-  # Write log
   date_line = "TRG IN: "+date_1+' TRG END :' + \
     date_2+' FILE WRITE START '+date_3+'\n'
   f_log.write(date_line)
   f_log.close()
     
-  # time of Output
   d_today = datetime.datetime.now()
   str(d_today.strftime('%H%M'))
   
-  # Data Output
   DataOutputToBinaryFile(Oscdata, BinaryFileName, OscInformation)
   DataOutputToParameterFile()  
   
@@ -255,5 +207,3 @@ if __name__ == "__main__":
   FileNo = FileInfo.GetMaxFileNumber() + 1
   BinaryFileName = conf.DataPath + str(FileNo).zfill(4) + ".bin"
   main(BinaryFileName)  
-  
-  #  main()

@@ -22,15 +22,17 @@ print(visa_list)                                                            # �
 FG = None                                                                   # ファンクションジェネレータのための変数を初期化
 Osc = None                                                                  # オシロスコープのための変数を初期化
 
+
+
+# ファンクションジェネレータとオシロスコープのリソースをオープン
+FG=rm.open_resource("USB0::0x0D4A::0x000D::9217876::INSTR")                 # ノダさんのファンクションジェネレータ
+Osc = rm.open_resource("USB0::0x0957::0x1798::MY61410321::INSTR")           # Keysightオシロスコープ
+
 NAverage=64
 Query_delay = 0
 TOrigin=float(Osc.query("WAVeform:XORigin?"))
 TReference=float(Osc.query("WAVeform:XREFerence?"))
 TIncrement=float(Osc.query("WAVeform:XINCrement?"))
-
-# ファンクションジェネレータとオシロスコープのリソースをオープン
-FG=rm.open_resource("USB0::0x0D4A::0x000D::9217876::INSTR")                 # ノダさんのファンクションジェネレータ
-Osc = rm.open_resource("USB0::0x0957::0x1798::MY61410321::INSTR")           # Keysightオシロスコープ
 
 def InitialSetFG():
   # ファンクションジェネレータの初期設定
@@ -116,7 +118,7 @@ def EPR():
 
   FG.write("OUTPut:STATe OFF")                                              # ファンクションジェネレータの出力をOFF
 
-def main(BinaryFileName):
+def main():
   #print("Pulse Time : ", conf.ModulationTime, " Memory Number : ", conf.FGMemory)
   print("Initialization of Oscilloscope")
   InitialSetOsc()
