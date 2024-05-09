@@ -71,11 +71,15 @@ def EPR():
 
   # オシロスコープからチャンネル2のデータを取得
   Osc.write(":WAVeform:SOURce CHANnel2")
-  OscData_CH2 = Osc.query_ascii_values(":WAVeform:DATA?")
+  # ASCIIデータを取得し、最初の10行をスキップ
+  data2 = Osc.query(":WAVeform:DATA?")
+  OscData_CH2 = [float(val) for val in data2.split(",")[10:]]
 
   # オシロスコープからチャンネル3のデータを取得
   Osc.write(":WAVeform:SOURce CHANnel3")
-  OscData_CH3 = Osc.query_ascii_values(":WAVeform:DATA?")
+  # ASCIIデータを取得し、最初の10行をスキップ
+  data3 = Osc.query(":WAVeform:DATA?")
+  OscData_CH3 = [float(val) for val in data3.split(",")[10:]]
 
   FG.write("OUTPut:STATe OFF")  # ファンクションジェネレータの出力をOFF
 
