@@ -62,8 +62,7 @@ def InitialSetOsc():
   Osc.write(":STOP")                                                        # フロントパネルのStopを押す
   Osc.write(":RUN")                                                         # フロントパネルのRunを押す
   Osc.write(":TRIGger:SWEep Normal")                                        # トリガーモードをNormalに設定
-  Osc.write(":DIGitize CHANnel1") 
-  Osc.write(":DIGitize CHANnel3")                                                 # データ取得を開始
+  Osc.write(":DIGitize") 
 
 
 def EPR():
