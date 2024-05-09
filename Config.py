@@ -5,7 +5,6 @@ import Const as const
 
 # start time
 const.StartTime = datetime.datetime.now()
-
 ####################################################
 # AFPNMR
 # Path name

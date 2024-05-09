@@ -31,7 +31,7 @@ def InitialSetFG():
 def InitialSetOsc():
   # オシロスコープの初期設定
   Osc.write(":RUN")                                                         # フロントパネルのRunを押す
-  Osc.write(":DISPlay:CLEar")  # オシロの表示をリセット
+  Osc.write(":DISPlay:CLEar")                                               # オシロの表示をリセット
   Osc.write(":TIMebase:RANGe %f" % (conf.OscWindowscale_EPR))               # ウィンドウの水平方向のフルスケールを秒単位で設定
   Osc.write(":TIMebase:REFerence CENTer")                                   # 信号のディレイの基準点を中央にする
   Osc.write(":TIMebase:POSition %f" % (conf.OscDelayTime_EPR))              # トリガーと基準点の時間間隔を設定
@@ -71,9 +71,9 @@ def EPR():
 
   # オシロスコープからチャンネル2と3のデータを取得
   Osc.write(":WAVeform:SOURce CHANnel2")
-  OscData_CH2 = Osc.query_binary_values(":WAVeform:DATA?", datatype='B')    #マジでこいつだけのせい
+  OscData_CH2 = Osc.query_binary_values(":WAVeform:DATA?", datatype='B')    
   Osc.write(":WAVeform:SOURce CHANnel3")
-  OscData_CH3 = Osc.query_binary_values(":WAVeform:DATA?", datatype='B')    #マジでこいつだけのせい
+  OscData_CH3 = Osc.query_binary_values(":WAVeform:DATA?", datatype='B')    
   FG.write("OUTPut:STATe OFF")                                              # ファンクションジェネレータの出力をOFF
   
   return OscData_CH2, OscData_CH3
