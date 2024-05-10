@@ -19,6 +19,8 @@ Osc = None                                                                  # �
 FG=rm.open_resource("USB0::0x0D4A::0x000D::9217876::INSTR")                 # ノダさんのファンクションジェネレータ
 Osc = rm.open_resource("USB0::0x0957::0x1798::MY61410321::INSTR")           # Keysightオシロスコープ
 
+Osc.timeout = 10000                                                         #time out time (ms)
+
 def InitialSetFG():
   # ファンクションジェネレータの初期設定
   FG.write(":SOURce:MODE Modulation") 
@@ -67,7 +69,6 @@ def InitialSetOsc():
 
 def EPR():
   # EPR測定のための波形取得処理
-  print("EPR Start")
   FG.write("OUTPut:STATe ON")                                               # ファンクションジェネレータの出力をON
   time.sleep(2)                                                             # アベレージのために少し待つ
 
@@ -89,8 +90,7 @@ def EPR():
   TReference = float(Osc.query("WAVeform:XREFerence?"))                     # 時間基準点
   TIncrement = float(Osc.query("WAVeform:XINCrement?"))                     # 時間間隔
 
-  Time=[(i-TReference)*TIncrement+TOrigin for i in range(NPoint)]
-
+  Time=[(i-TReference)*TIncrement+TOrigin for i in range(NPoint)]           # 時間点の較正
 
   FG.write("OUTPut:STATe OFF")                                              # ファンクションジェネレータの出力をOFF
   
@@ -107,8 +107,8 @@ def GetOscInformation():
   
   return TOrigin, TReference, TIncrement, VOrigin, VReference, VIncrement
 
-def DataOutputToBinaryFile(OscData_CH2, OscData_CH3, Time, NPoint, TextFileName):
-  # バイナリファイルへのデータ出力
+def DataOutputToTextFile(OscData_CH2, OscData_CH3, Time, NPoint, TextFileName):
+  # テキストファイルへのデータ出力
   with open(TextFileName,mode="a") as f:
     for i in range(NPoint):
       f.write("%f %f %f\n" %(Time[i], OscData_CH2[i], OscData_CH3[i]))
@@ -131,7 +131,7 @@ def DataOutputToParameterFile():
   df.to_csv(conf.FileNameParameter, mode="a", index=False, header=header)
 
 def main(TextFileName):
-  #print("Pulse Time : ", conf.ModulationTime, " Memory Number : ", conf.FGMemory)
+  print("Pulse Time : ", conf.ModulationTime, " Memory Number : ", conf.FGMemory)
   print("Initialization of Oscilloscope")
   InitialSetOsc()
   print("Initialization of Function Generator ")
@@ -154,13 +154,13 @@ def main(TextFileName):
   d_today = datetime.datetime.now()
   str(d_today.strftime('%H%M'))
 
-  DataOutputToBinaryFile(OscData_CH2, OscData_CH3, Time, NPoint, TextFileName)
+  DataOutputToTextFile(OscData_CH2, OscData_CH3, Time, NPoint, TextFileName)
   DataOutputToParameterFile()
 
 if __name__ == "__main__":
   # スクリプトが直接実行された場合の処理
   os.makedirs(conf.DataPath, exist_ok=True)                                 # データ保存ディレクトリを作成（存在しない場合）
   FileNo = FileInfo.GetMaxFileNumber() + 1                                  # 新しいファイル番号を取得
-  TextFileName = conf.DataPath + str(FileNo).zfill(4) + ".text"            # 新しいバイナリファイル名を生成
-  main(TextFileName)                                                      # メイン関数を実行
+  TextFileName = conf.DataPath + str(FileNo).zfill(4) + ".text"             # 新しいテキストファイル名を生成
+  main(TextFileName)                                                        # メイン関数を実行
 

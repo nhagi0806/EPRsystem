@@ -19,6 +19,8 @@ Osc = None                                                                  # �
 FG=rm.open_resource("USB0::0x0D4A::0x000D::9217876::INSTR")                 # ノダさんのファンクションジェネレータ
 Osc = rm.open_resource("USB0::0x0957::0x1798::MY61410321::INSTR")           # Keysightオシロスコープ
 
+Osc.timeout = 10000                                                         #time out time (ms)
+
 def InitialSetFG():
   # ファンクションジェネレータの初期設定
   FG.write(":SOURce:MODE Modulation") 
@@ -67,13 +69,14 @@ def InitialSetOsc():
 def EPR():
   # EPR測定のための波形取得処理
   FG.write("OUTPut:STATe ON")                                               # ファンクションジェネレータの出力をON
-  time.sleep(5)                                                             # アベレージのために少し待つ
+  time.sleep(2)                                                             # アベレージのために少し待つ
 
   # オシロスコープからチャンネル2と3のデータを取得
   Osc.write(":WAVeform:SOURce CHANnel2")
   OscData_CH2 = Osc.query_binary_values(":WAVeform:DATA?", datatype='B')    
   Osc.write(":WAVeform:SOURce CHANnel3")
   OscData_CH3 = Osc.query_binary_values(":WAVeform:DATA?", datatype='B')    
+
   FG.write("OUTPut:STATe OFF")                                              # ファンクションジェネレータの出力をOFF
   
   return OscData_CH2, OscData_CH3
@@ -125,8 +128,8 @@ def main(BinaryFileName):
   print("Initialization of Function Generator ")
   InitialSetFG()
 
-  print("EPR Get")
   OscData_CH2, OscData_CH3 = EPR()
+  print("EPR Get")
 
   OscInformation = GetOscInformation()
   print("TOrigin: {0}, TReference: {1}, TIncrement: {2}".format(OscInformation[0], OscInformation[1], OscInformation[2]))
