@@ -26,14 +26,14 @@ def InitialSetFG():
   FG.write(f":SOURce:MODulation:FM:INTernal:FREQuency {conf.ModulationFreq_EPR}")
   FG.write(f":SOURce:MODulation:FM:DEViation {conf.iDeltaFreq_EPR}")
 
-def InitialSetFM():
-    FG.write(":Source1:FM:State ON")
-    FG.write(":Source1:FM:Source Internal")
-    FG.write(":Source1:FM:Internal:Function:Shape PRAMP")
-    FG.write(":Source1:Voltage 5" )
-    FG.write(":Source1:FM:Internal:Frequency 1000Hz")
-    FG.write(":Source1:Frequency 9.26e6HZ")
-    FG.write(":Source1:FM:Deviation 1.852e6HZ")
+def InitialSetFG():
+  FG.write(":Source1:FM:State ON")
+  FG.write(":Source1:FM:Source Internal")
+  FG.write(":Source1:FM:Internal:Function:Shape PRAMP")
+  FG.write(":Source1:Voltage 5" )
+  FG.write(":Source1:FM:Internal:Frequency 1000Hz")
+  FG.write(":Source1:Frequency 9.26e6HZ")
+  FG.write(":Source1:FM:Deviation 1.852e6HZ")
 
 
 def main():

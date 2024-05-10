@@ -25,8 +25,8 @@ def InitialSetFG():
   FG.write(":SOURce:FUNCtion:SHAPe Sin")                                       # 関数をサイン波に設定
   FG.write(f":SOURce:FREQuency {conf.Freq_EPR}")
   FG.write(f":SOURce:VOLTage {conf.Voltage_EPR}")
-  FG.write(f":SOURce:MODulation:FM:INTernal:FREQuency {conf.ModulationFreq_EPR}")
-  FG.write(f":SOURce:MODulation:FM:DEViation {conf.iDeltaFreq_EPR}")
+  FG.write(f":SOURce:FM:Internal:Frequency {conf.ModulationFreq_EPR}")
+  FG.write(f":SOURce:FM:deviation {conf.iDeltaFreq_EPR}")
 
 def InitialSetOsc():
   # オシロスコープの初期設定
