@@ -48,3 +48,16 @@ def GetMaxFileNumber():
     else:
         vmax = max(numbers)
     return vmax
+
+def GetMaxFileNumber_text():
+    extension = '.text'
+    pattern = re.compile(r'\d{4}\.text$')
+    files = [f for f in os.listdir(conf.DataPath) if f.endswith(extension) and pattern.match(f)]
+    numbers = [int(f.split('.')[0]) for f in files]
+    vmax = 0
+    print(numbers)
+    if not numbers:
+        vmax = 0
+    else:
+        vmax = max(numbers)
+    return vmax
