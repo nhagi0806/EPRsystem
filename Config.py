@@ -2,6 +2,8 @@ import math
 import datetime
 import os
 import Const as const
+import numpy as np
+import pandas as pd
 
 # start time
 const.StartTime = datetime.datetime.now()
@@ -22,6 +24,7 @@ GoogleDrivePath  = HomePath + "/マイドライブ/" + DataDirectryName
 # File name
 FileNameLog          = DataPath + "Log.txt"
 FileNameParameter    = DataPath + "Parameter.csv"
+FileNamePolarizarion = DataPath + "Polarizarion.text"
 
 TimeInterval         = 3600   # [sec]
 
@@ -99,3 +102,15 @@ OscTriggerLevel_EPR = 1              # Trigger level [V]
 OscChTrigger_EPR    = 3              # Osc channel for the sync out of the function generator
 OscAverage_EPR      = 4096             # Number of times of average
 OscDataPoint_EPR    = 1000            # Data points {100 | 250 | 500 | 1000 | 2000 | 5000 | 10000 | 20000 | 50000 | 100000 | 200000 | 500000 | 1000000}
+
+
+A_hfs = 1.011911 * 10**9  # Hz
+I = 5 / 2
+g_s = 2.002331
+mu_B = 9.927401 * 10**-24  # J/T
+mu_0 = 4 * np.pi * 10**-7
+mu_129 = -3.929344 * 10**-27  # N/A**2
+kapper_0 = 518
+B_0 = 1.6133 * 10**-3  # T
+h = 6.62607015 * 10**-34
+num_129 = 7.32 * 10**25

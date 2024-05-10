@@ -221,15 +221,13 @@ def DataOutputToTextFile(OscData_CH2, OscData_CH3, Time, NPoint, TextFileName):
     for i in range(NPoint):
       f.write("%f %f %f\n" %(Time[i], OscData_CH2[i], OscData_CH3[i]))
 
-def DataOutputToParameterFile():     #後できれいにできないかな
+def DataOutputToParameterFile():
   # パラメータファイルへの出力処理
   NowTime = datetime.datetime.now()                                            # 現在の日時を取得
   DataDictionary = dict(
     Time=[NowTime],
     TimeInterval=[conf.TimeInterval],
     Voltage=[conf.FGVoltage],
-    FunctionGenerator=[FG_1],
-    FunctionGenerator=[FG_2],
     Oscilloscope=[Osc],
     FreqRange=[conf.FreqRange]
   )
@@ -302,7 +300,7 @@ def main():
         str(d_today.strftime('%H%M'))
   
         DataOutputToBinaryFile(Oscdata, BinaryFileName, OscInformation)
-        DataOutputToParameterFile()  
+        DataOutputToParameterFile()
 
 if __name__ == "__main__":
   
