@@ -18,28 +18,8 @@ print(visa_list)
 FG = None
 Osc = None
 
-for index, dev_name in enumerate(visa_list):
-  if dev_name.startswith("USB"):
-    dev = rm.open_resource(dev_name)
-    try:
-      out = dev.query('*IDN?')
-      print(dev)
-      print(out)
-      if out.startswith('AGILENT') or out.startswith('KEYSIGHT'):
-        Osc = dev
-        Osc.timeout = conf.OscTimeout
-      elif out.startswith('NF Corporation'):
-        FG = dev
-    except Exception as e:
-      print(f"Error while querying device {dev_name}: {e}")
-
-if FG is None:
-  print("Function Generator is not connected...")
-  exit()
-if Osc is None:
-  print("Oscilloscope is not connected...")
-  exit()
-
+FG=rm.open_resource("USB0::0x0D4A::0x000D::9122074::INSTR")                 # 原田さんのファンクションジェネレータ
+Osc = rm.open_resource("USB0::0x0957::0x1798::MY61410321::INSTR")           # Keysightオシロスコープ
 
 def InitialSetFG():
   FG.write(":SOURce:MODE BURSt") # 発信モードをバーストに設定
