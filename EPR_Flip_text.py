@@ -20,8 +20,8 @@ FG_2 = None
 Osc = None
 
 # ファンクションジェネレータとオシロスコープのリソースをオープン
-FG_11=rm.open_resource("USB0::0x0D4A::0x000D::9217876::INSTR")                 # ノダさんのファンクションジェネレータ
-FG_2_2=rm.open_resource("USB0::0x0D4A::0x000D::9122074::INSTR")                # 原田さんのファンクションジェネレータ
+FG_1=rm.open_resource("USB0::0x0D4A::0x000D::9217876::INSTR")                 # ノダさんのファンクションジェネレータ
+FG_2=rm.open_resource("USB0::0x0D4A::0x000D::9122074::INSTR")                # 原田さんのファンクションジェネレータ
 Osc = rm.open_resource("USB0::0x0957::0x1798::MY61410321::INSTR")              # Keysightオシロスコープ
 
 if FG_1 is None:
@@ -48,7 +48,7 @@ def InitialSetOsc_EPR():
   Osc.write(":RUN")                                                            # フロントパネルのRunを押す
   Osc.write(":DISPlay:CLEar")                                                  # オシロの表示をリセット
   Osc.write(":TIMebase:RANGe %f" % (conf.OscWindowscale_EPR))                  # ウィンドウの水平方向のフルスケールを秒単位で設定
-  Osc.write(":TIMebase:REFerence CENTer")                                      # 信号のディレイの基準点を中央にする
+  Osc.write(":TIMebase:REFerence LEFT")                                        # 信号のディレイの基準点をLEFTにする
   Osc.write(":TIMebase:POSition %f" % (conf.OscDelayTime_EPR))                 # トリガーと基準点の時間間隔を設定
 
   # チャンネルのON/OFFとオフセットを設定

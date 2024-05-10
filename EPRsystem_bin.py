@@ -33,7 +33,7 @@ def InitialSetOsc():
   Osc.write(":RUN")                                                            # フロントパネルのRunを押す
   Osc.write(":DISPlay:CLEar")                                                  # オシロの表示をリセット
   Osc.write(":TIMebase:RANGe %f" % (conf.OscWindowscale_EPR))                  # ウィンドウの水平方向のフルスケールを秒単位で設定
-  Osc.write(":TIMebase:REFerence CENTer")                                      # 信号のディレイの基準点を中央にする
+  Osc.write(":TIMebase:REFerence LEFT")                                        # 信号のディレイの基準点をLEFTにする
   Osc.write(":TIMebase:POSition %f" % (conf.OscDelayTime_EPR))                 # トリガーと基準点の時間間隔を設定
 
   # チャンネルのON/OFFとオフセットを設定

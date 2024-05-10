@@ -21,8 +21,9 @@ Osc = rm.open_resource("USB0::0x0957::0x1798::MY61410321::INSTR")              #
 
 def InitialSetFG():
   # ファンクションジェネレータの初期設定
-  FG.write(":SOURce:MODE Modulation") 
-  FG.write(":SOURce:FUNCtion:SHAPe Sin")                                       # 関数をサイン波に設定
+  FG.write(":SOURce:FM:State ON")
+  FG.write(":SOURce:FM:Source Internal")
+  FG.write(":Source1:FM:Internal:Function:Shape SIN")
   FG.write(f":SOURce:FREQuency {conf.Freq_EPR}")
   FG.write(f":SOURce:VOLTage {conf.Voltage_EPR}")
   FG.write(f":SOURce:MODulation:FM:INTernal:FREQuency {conf.ModulationFreq_EPR}")
@@ -33,7 +34,7 @@ def InitialSetOsc():
   Osc.write(":RUN")                                                            # フロントパネルのRunを押す
   Osc.write(":DISPlay:CLEar")                                                  # オシロの表示をリセット
   Osc.write(":TIMebase:RANGe %f" % (conf.OscWindowscale_EPR))                  # ウィンドウの水平方向のフルスケールを秒単位で設定
-  Osc.write(":TIMebase:REFerence CENTer")                                      # 信号のディレイの基準点を中央にする
+  Osc.write(":TIMebase:REFerence LEFT")                                        # 信号のディレイの基準点をLEFTにする
   Osc.write(":TIMebase:POSition %f" % (conf.OscDelayTime_EPR))                 # トリガーと基準点の時間間隔を設定
 
   # チャンネルのON/OFFとオフセットを設定

@@ -20,8 +20,8 @@ FG_2 = None
 Osc = None
 
 # ファンクションジェネレータとオシロスコープのリソースをオープン
-FG_11=rm.open_resource("USB0::0x0D4A::0x000D::9217876::INSTR")                 # ノダさんのファンクションジェネレータ
-FG_2_2=rm.open_resource("USB0::0x0D4A::0x000D::9122074::INSTR")                # 原田さんのファンクションジェネレータ
+FG_1=rm.open_resource("USB0::0x0D4A::0x000D::9217876::INSTR")                 # ノダさんのファンクションジェネレータ
+FG_2=rm.open_resource("USB0::0x0D4A::0x000D::9122074::INSTR")                # 原田さんのファンクションジェネレータ
 Osc = rm.open_resource("USB0::0x0957::0x1798::MY61410321::INSTR")              # Keysightオシロスコープ
 
 if FG_1 is None:
@@ -48,7 +48,7 @@ def InitialSetOsc_EPR():
   Osc.write(":RUN")                                                            # フロントパネルのRunを押す
   Osc.write(":DISPlay:CLEar")  # オシロの表示をリセット
   Osc.write(":TIMebase:RANGe %f" % (conf.OscWindowscale_EPR))                  # ウィンドウの水平方向のフルスケールを秒単位で設定
-  Osc.write(":TIMebase:REFerence CENTer")                                      # 信号のディレイの基準点を中央にする
+  Osc.write(":TIMebase:REFerence LEFT")                                        # 信号のディレイの基準点をLEFTにする
   Osc.write(":TIMebase:POSition %f" % (conf.OscDelayTime_EPR))                 # トリガーと基準点の時間間隔を設定
 
   # チャンネルのON/OFFとオフセットを設定
@@ -231,6 +231,7 @@ def DataOutputToParameterFile():     #後できれいにできないかな
 
 def main():
     for i in range(2):
+        # EPR
         FileNo = FileInfo.GetMaxFileNumber() + 1
         BinaryFileName = conf.DataPath + str(FileNo).zfill(4) + ".bin"
         print("Initialization of Oscilloscope for EPR")
@@ -240,10 +241,6 @@ def main():
 
         print("EPR Get")
         OscData_CH2, OscData_CH3 = EPR()
-
-        OscInformation = GetOscInformation()
-        print("TOrigin: {0}, TReference: {1}, TIncrement: {2}".format(OscInformation[0], OscInformation[1], OscInformation[2]))
-        print("VOrigin: {0}, VReference: {1}, VIncrement: {2}".format(OscInformation[3], OscInformation[4], OscInformation[5]))
 
         t = datetime.datetime.now()
         date_3 = str(t)[:-3]
@@ -258,7 +255,7 @@ def main():
         DataOutputToBinaryFile_EPR(OscData_CH2, OscData_CH3, BinaryFileName, OscInformation)
         DataOutputToParameterFile()
 
-        # 二番目の処理グループ
+        # SpinFlip
         FileNo = FileInfo.GetMaxFileNumber() + 1
         BinaryFileName = conf.DataPath + str(FileNo).zfill(4) + ".bin"
         print("Pulse Time : ", conf.ModulationTime, " Memory Number : ", conf.FGMemory)
