@@ -92,8 +92,8 @@ ParameterLimitRelax = [[0, 1], [0, 500]]
 #EPR
 Freq_EPR = 7500000
 Voltage_EPR=20
-ModulationFreq_EPR=1000000
-iDeltaFreq_EPR=1503
+ModulationFreq_EPR=2001
+iDeltaFreq_EPR=100000
 
 #OscWindowscale_EPR = 1
 OscWindowscale_EPR = 1e-3
